@@ -633,11 +633,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', 
       <span class="nav-icon">◇</span>
       <span>Goals</span>
     </div>
-    <div class="nav-item" onclick="showPage('deploy')" id="nav-deploy">
-      <span class="nav-icon">⬆</span>
-      <span>Deploy</span>
-    </div>
-
     <div class="nav-section-label" style="margin-top:8px">Phases</div>
     <div class="nav-phase-item" onclick="showPage('curriculum'); setTimeout(()=>scrollToPhase('p1'),100)">
       <div class="phase-dot p1"></div>Phase 1 · Foundations
@@ -802,50 +797,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', 
     </div>
   </div>
 
-  <!-- DEPLOY — GitHub Pages guide -->
-  <div class="page" id="page-deploy">
-    <div class="page-header">
-      <h1>Deploy <em>&</em> Host</h1>
-      <p>Step-by-step guide to hosting this tracker on GitHub Pages — free, fast, and yours</p>
-    </div>
-    <div class="deploy-content">
-
-      <div class="deploy-intro">
-        <p>
-          GitHub Pages turns any repository into a live website at
-          <strong>https://yourusername.github.io/repo-name/</strong> — completely free, served over HTTPS,
-          and updates automatically whenever you push changes. This guide walks you from zero to deployed in about
-          <strong>10 minutes</strong>. No servers, no costs, no configuration files needed.
-        </p>
-      </div>
-
-      <div class="deploy-step-list" id="deploy-step-list"></div>
-
-      <div class="deploy-faq">
-        <h3>Common Questions</h3>
-        <div class="faq-item">
-          <div class="faq-q">My site shows a 404 after enabling Pages — what went wrong?</div>
-          <div class="faq-a">GitHub Pages can take 1–3 minutes to build after you enable it. Hard-refresh your browser (Ctrl+Shift+R) and wait a moment. Also confirm the file is named exactly <code style="font-family:'Fira Code',monospace;font-size:11px;color:var(--accent)">index.html</code> (lowercase) and is in the root of your repository, not inside a subfolder.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Will my Firebase login and cloud sync still work on the hosted site?</div>
-          <div class="faq-a">Yes — Firebase is initialised client-side and communicates directly with Google's servers from the visitor's browser. The only thing you need to do is add your GitHub Pages URL (e.g. <code style="font-family:'Fira Code',monospace;font-size:11px;color:var(--accent)">https://yourusername.github.io</code>) to the <strong>Authorised domains</strong> list in Firebase Console → Authentication → Settings. Without this, Google sign-in will be blocked.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Can I use a custom domain (e.g. drl-tracker.com) instead of github.io?</div>
-          <div class="faq-a">Yes. In your repo Settings → Pages, enter your custom domain in the "Custom domain" field. Then with your domain registrar, add a CNAME DNS record pointing to <code style="font-family:'Fira Code',monospace;font-size:11px;color:var(--accent)">yourusername.github.io</code>. DNS propagation takes up to 24 hours. GitHub automatically provisions an HTTPS certificate via Let's Encrypt once verified.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">I updated the HTML file — how do I redeploy?</div>
-          <div class="faq-a">Just push the updated file to your repository. GitHub Pages rebuilds automatically within 1–2 minutes. You can check the build status under your repo's Actions tab (a small orange dot turns green when done).</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Should the repository be public or private?</div>
-          <div class="faq-a">For GitHub Pages on a free account, the repository <strong>must be public</strong> to use the free tier. If you need a private repo with Pages, you need GitHub Pro (paid). Since this tracker has no secret keys embedded in the HTML (Firebase handles auth separately), making it public is safe.</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </main>
 
@@ -1614,6 +1565,13 @@ function buildTimeline() {
 // ═══════════════════════════════════════════════════════
 function buildCurriculum() {
   const container = document.getElementById('curriculum-container');
+
+  // Save open state of all phases and topics before wiping DOM
+  const openPhases = new Set();
+  const openTopics = new Set();
+  container.querySelectorAll('.phase-section.open').forEach(el => openPhases.add(el.id));
+  container.querySelectorAll('.topic-item.open').forEach(el => openTopics.add(el.id));
+
   container.innerHTML = '';
 
   CURRICULUM.forEach((phase, pi) => {
@@ -1663,6 +1621,12 @@ function buildCurriculum() {
       </div>
     `;
     container.appendChild(section);
+
+    // Restore open state
+    if (openPhases.has(section.id)) section.classList.add('open');
+    section.querySelectorAll('.topic-item').forEach(el => {
+      if (openTopics.has(el.id)) el.classList.add('open');
+    });
   });
 }
 
@@ -2186,7 +2150,6 @@ function refreshAll() {
   buildCurriculum();
   buildResources();
   buildGoals();
-  buildDeployPage();
   renderNotesList();
   renderEditor();
   updateProgress();
@@ -2213,7 +2176,6 @@ buildDashPhaseRows();
 buildCurriculum();
 buildResources();
 buildGoals();
-buildDeployPage();
 renderNotesList();
 renderEditor();
 updateProgress();
